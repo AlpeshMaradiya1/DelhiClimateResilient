@@ -1,0 +1,1 @@
+Delhi faces a multi-faceted climate crisis. Rapid urbanization, population density, and existing infrastructure gaps create significant vulnerabilities to extreme heat, pollution, water scarcity, and waste management challenges. This section explores the data behind these critical issues.
