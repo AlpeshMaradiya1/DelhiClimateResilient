@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: A Study of the Climate Resilient City - Delhi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: City & Climate (Urban Blues, Earthy Greens, Warm Neutrals) -->
+    <!-- Application Structure Plan: The SPA is structured into four thematic, scrollable sections for a clear narrative flow: 1) Introduction & Key Stats (an engaging entry point with high-impact numbers), 2) Delhi's Core Vulnerabilities (a deep dive into the main challenges like heat, water, waste, and pollution), 3) Solutions & Case Studies (showcasing actionable strategies and comparing Delhi with Copenhagen), and 4) The Way Forward (presenting clear, actionable recommendations). This structure was chosen to guide the user from understanding the problem's scale to exploring solutions and future actions, making a complex report digestible and user-friendly. Navigation is facilitated by a sticky header, allowing users to jump between these logical sections easily. -->
+    <!-- Visualization & Content Choices: 1) Key Stats: Goal is to inform and create impact. Method is using large, bold numbers and icons for quick comprehension. 2) Vulnerabilities (Heat, Waste, Water): Goal is to compare and show trends. Method is using Chart.js line, bar, and doughnut charts to visualize data like temperature trends, waste processing gaps, and survey results on water issues. The inclusion of new charts and contextual text makes the data presentation more robust. 3) Copenhagen vs. Delhi Emissions: Goal is to compare. Method is a doughnut chart to starkly contrast emission sources. New custom legends with percentages and numerical data have been added to all doughnut charts for enhanced clarity. 4) Recommendations: Goal is to organize and inform with predictions. The previous, more direct layout has been restored, with new data points and predictions added to make it more impactful and data-driven. The font colors and overall aesthetic have been refined to be more professional and integrated. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F5F2;
+            color: #333;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #4a5568;
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .stat-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #c0392b;
+        }
+        .active-nav {
+            color: #c0392b;
+            font-weight: 600;
+        }
+        .doughnut-legend-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        .doughnut-legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+        .doughnut-legend-color {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">Delhi Climate Resilience</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#introduction" class="nav-link text-gray-600">Introduction</a>
+                <a href="#vulnerabilities" class="nav-link text-gray-600">Vulnerabilities</a>
+                <a href="#solutions" class="nav-link text-gray-600">Solutions</a>
+                <a href="#way-forward" class="nav-link text-gray-600">Way Forward</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="introduction" class="py-20 px-4">
+            <div class="container mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">A Study of the Climate Resilient City</h1>
+                <p class="text-lg text-gray-600 mb-12 max-w-3xl mx-auto">An interactive summary of the fellowship report by Alpesh S. Maradiya, exploring Delhi's climate challenges and path towards a sustainable future.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="stat-card">
+                        <div class="text-4xl font-bold text-red-600 mb-2">4.5%</div>
+                        <p class="text-gray-600">Projected GDP loss for India by 2030 due to extreme climate events.</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-4xl font-bold text-blue-600 mb-2">43M</div>
+                        <p class="text-gray-600">Projected population of Delhi by 2035, making it the world's most populous city.</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-4xl font-bold text-yellow-600 mb-2">₹2.75T</div>
+                        <p class="text-gray-600">Projected economic losses for Delhi by 2050 due to climate impacts.</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-4xl font-bold text-green-600 mb-2">20.22%</div>
+                        <p class="text-gray-600">Current green cover in Delhi, with a target to reach 25% by 2030.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="vulnerabilities" class="py-20 px-4 bg-gray-100">
+            <div class="container mx-auto">
+                <h2 class="section-title">Delhi's Core Vulnerabilities</h2>
+                <p class="section-subtitle">Delhi faces a multi-faceted climate crisis. Rapid urbanization, population density, and existing infrastructure gaps create significant vulnerabilities to extreme heat, pollution, water scarcity, and waste management challenges. This section explores the data behind these critical issues.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Rising Temperatures & Extreme Heat</h3>
+                        <p class="text-gray-600 text-center mb-4">Delhi's annual temperatures are projected to rise significantly, increasing health risks and energy demand. The frequency of extremely hot days is also increasing year-over-year.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="heatChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Air Pollution: A Public Health Crisis</h3>
+                        <p class="text-gray-600 text-center mb-4">Air quality remains a primary concern for residents, with particulate matter levels consistently exceeding safe limits. According to a survey, over two-thirds of residents consider air quality the most serious climate issue in Delhi.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="pollutionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Solid Waste Management Gap</h3>
+                        <p class="text-gray-600 text-center mb-4">The city generates a massive amount of waste daily, with a significant portion remaining unprocessed and sent to overflowing landfills. This highlights a critical gap between generation and processing capacity.</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="wasteChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Water Management Challenges</h3>
+                        <p class="text-gray-600 text-center mb-4">Delhi's water demand outstrips its production, leading to shortages. A significant portion of the city's water supply is lost as Non-Revenue Water, and a recent survey reveals that water quality and sewage management are major concerns for residents.</p>
+                        <div class="chart-container h-64 md:h-80 mb-8">
+                            <canvas id="waterDemandChart"></canvas>
+                        </div>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="waterIssuesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-20 px-4">
+            <div class="container mx-auto">
+                <h2 class="section-title">Solutions & Global Benchmarks</h2>
+                <p class="section-subtitle">Addressing Delhi's climate challenges requires a robust action plan. This involves enhancing green infrastructure and learning from global leaders in urban sustainability. Here, we compare Delhi's emission sources with Copenhagen, a city aiming for carbon neutrality.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Delhi's CO2 Emission Sources</h3>
+                        <div class="chart-container">
+                            <canvas id="delhiEmissionsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-semibold text-center mb-4">Copenhagen's CO2 Reduction Plan</h3>
+                        <div class="chart-container">
+                            <canvas id="copenhagenEmissionsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16 bg-gray-100 p-8 rounded-lg shadow-inner">
+                    <h3 class="text-2xl font-bold text-center mb-6">Case Study: Surat Diamond Bourse</h3>
+                    <p class="text-gray-600 text-center max-w-3xl mx-auto mb-6">A leading example of green infrastructure in India, the Surat Diamond Bourse achieved an IGBC Platinum rating. It demonstrates that large-scale development can be sustainable, featuring a 50% reduction in energy consumption compared to typical green buildings through innovative design and radiant cooling.</p>
+                    <div class="flex justify-center space-x-8 text-center">
+                        <div>
+                            <p class="text-3xl font-bold text-green-600">50%</p>
+                            <p class="text-gray-500">Energy Savings</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-green-600">40%</p>
+                            <p class="text-gray-500">Naturally Ventilated</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-green-600">75%</p>
+                            <p class="text-gray-500">Day-lit Workspaces</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="way-forward" class="py-20 px-4 bg-gray-100">
+            <div class="container mx-auto">
+                <h2 class="section-title">The Way Forward: Recommendations</h2>
+                <p class="section-subtitle">Building a climate-resilient Delhi requires a shift in policy, governance, and public behavior. The following recommendations are crucial for transforming Delhi into a sustainable and livable megacity, focusing on actionable strategies for long-term impact.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="Target">🎯</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Adopt a SMART Policy Framework</h4>
+                        <p class="text-gray-600 mb-4">Policies should be Specific, Measurable, Achievable, Relevant, and Time-bound. The current plan's lack of a specific financial roadmap makes implementation challenging. Copenhagen's plan, though shorter, provided a clear budget and investment strategy, showing a path forward for Delhi's ambitious goals.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="Data">📊</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Enhance Technology and Data-Driven Policy</h4>
+                        <p class="text-gray-600 mb-4">Policy-making is still based on decade-old data. The report recommends implementing real-time data monitoring, similar to air pollution stations, for all climate parameters. This would enable dynamic policy adjustments, moving from a static plan to a live, responsive approach that addresses issues like waste management and groundwater depletion with precision.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="Nature">🌳</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Prioritize Inclusive Green Infrastructure</h4>
+                        <p class="text-gray-600 mb-4">While Delhi has high green cover, it's unevenly distributed. The report recommends expanding green cover to 25% by 2030 through urban forests and roadside trees, ensuring equitable access. This can reduce localized temperatures by 1.5°C to 5°C, providing relief to vulnerable communities and improving air quality.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="People">🤝</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Strengthen Local Governance and Citizen Participation</h4>
+                        <p class="text-gray-600 mb-4">Effective implementation requires real power at the local level. The report suggests adopting innovative Government-Public Partnerships (GPP) like Copenhagen's "People's Fund" for financing projects. This fosters community ownership and provides a direct return on investment, aligning citizen interests with the city's climate goals.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="Efficiency">💡</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Invest in Energy & Waste Efficiency</h4>
+                        <p class="text-gray-600 mb-4">With buildings consuming 32% of electricity, the report predicts demand will rise to 52% by 2047. Promoting green buildings and retrofitting old infrastructure is essential. A decentralized waste processing system at over 500 local collection centers can reduce pollution and save significant transportation costs.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                            <span class="text-4xl" role="img" aria-label="Water">💧</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-800">Revitalize Water Infrastructure</h4>
+                        <p class="text-gray-600 mb-4">The report notes that 58% of Delhi's water is Non-Revenue Water. A clear, long-term plan is needed to address this. While a 1976 drainage plan is overwhelmed, updating it with mandatory rainwater harvesting and permeable pavements is crucial to manage floods and recharge groundwater, securing the city's water future.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Interactive Report based on the work of Alpesh S. Maradiya.</p>
+            <p class="text-sm text-gray-400">Generated as an interactive web application.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const options = {
+                threshold: 0.5
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active-nav', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, options);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const chartLabelColor = '#4a5568';
+            const chartGridColor = '#e2e8f0';
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: chartLabelColor,
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        bodyFont: {
+                            family: "'Inter', sans-serif"
+                        },
+                        titleFont: {
+                            family: "'Inter', sans-serif"
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: chartLabelColor,
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: chartLabelColor,
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: chartGridColor
+                        }
+                    }
+                }
+            };
+
+            new Chart(document.getElementById('heatChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+                    datasets: [{
+                        label: 'Max Temp in April (°C)',
+                        data: [41, 40.6, 42, 43.2, 42, 42.1, 40.1, 42.2, 43.5, 40.2, 40.5],
+                        borderColor: '#DC2626',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Number of days > 40°C',
+                        data: [1, 2, 10, 10, 5, 8, 1, 8, 16, 4, 1],
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById('pollutionChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
+                    datasets: [{
+                        label: 'Daily Avg. PM10',
+                        data: [242, 217, 180, 210, 211, 205],
+                        backgroundColor: '#F59E0B',
+                        borderColor: '#D97706',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Daily Avg. PM2.5',
+                        data: [114, 108, 94, 104, 98, 100],
+                        backgroundColor: '#FBBF24',
+                        borderColor: '#D97706',
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById('wasteChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Processed Daily (MT)', 'Sent to Landfill (MT)'],
+                    datasets: [{
+                        data: [7542, 3800],
+                        backgroundColor: ['#22c55e', '#64748b'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...chartOptions, scales: {}, plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                        return {
+                                            text: `${label}: ${percentage} (${value} MT)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: chart.getDatasetMeta(0).data[i].hidden,
+                                            lineCap: 'round',
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            lineWidth: 1
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
+                }}
+            });
+
+            new Chart(document.getElementById('waterDemandChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Demand (MGD)', 'Production (MGD)'],
+                    datasets: [{
+                        label: 'Million Gallons per Day',
+                        data: [1290, 1000],
+                        backgroundColor: ['#3b82f6', '#93c5fd'],
+                        borderColor: '#1e40af',
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById('waterIssuesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Bad Quality Water', 'Irregular/Less Supply', 'Sewage Overflowing', 'No Sewage Cleaning', 'Polluted Ground Water', 'Supply from Tankers'],
+                    datasets: [{
+                        label: 'Survey on Water Issues',
+                        data: [27.8, 21.1, 15.6, 16.7, 14.4, 4.4],
+                        backgroundColor: ['#3b82f6', '#64748b', '#ef4444', '#fca5a5', '#22c55e', '#d1d5db'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...chartOptions, scales: {}, plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = value.toFixed(1) + '%';
+                                        return {
+                                            text: `${label}: ${percentage}`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: chart.getDatasetMeta(0).data[i].hidden,
+                                            lineCap: 'round',
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            lineWidth: 1
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
+                }}
+            });
+
+            new Chart(document.getElementById('delhiEmissionsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Power Plants', 'Vehicles', 'Domestic Fuel', 'Waste Burning'],
+                    datasets: [{
+                        label: 'Delhi CO2 Emissions',
+                        data: [47.8, 35.6, 7.8, 8.9],
+                        backgroundColor: ['#4b5563', '#1e40af', '#22c55e', '#a0aec0'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...chartOptions, scales: {}, plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    const rawData = [15.42 * 0.478, 15.42 * 0.356, 15.42 * 0.078, 15.42 * 0.089];
+                                    const total = 15.42;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = value.toFixed(1) + '%';
+                                        const tons = rawData[i].toFixed(2);
+                                        return {
+                                            text: `${label}: ${percentage} (${tons}M Tons)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: chart.getDatasetMeta(0).data[i].hidden,
+                                            lineCap: 'round',
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            lineWidth: 1
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
+                }}
+            });
+
+            new Chart(document.getElementById('copenhagenEmissionsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Energy Production', 'Green Mobility', 'Energy Consumption', 'City Admin', 'New Initiatives'],
+                    datasets: [{
+                        label: 'Copenhagen CO2 Reduction',
+                        data: [74, 11, 7, 2, 6],
+                        backgroundColor: ['#22c55e', '#3b82f6', '#15803d', '#4b5563', '#9ca3af'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...chartOptions, scales: {}, plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = value.toFixed(1) + '%';
+                                        return {
+                                            text: `${label}: ${percentage}`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: chart.getDatasetMeta(0).data[i].hidden,
+                                            lineCap: 'round',
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            lineWidth: 1
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
+                }}
+            });
+        });
+    </script>
+</body>
+</html>
